@@ -1,1 +1,1 @@
-# oauth-service
+# Authentication module
