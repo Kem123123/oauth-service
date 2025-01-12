@@ -13,7 +13,7 @@ pipeline {
         AWS_CREDENTIALS_ID = 'aws-credentials'    // Jenkins AWS credentials ID (configure AWS credentials in Jenkins)
 
         // Set JAVA_HOME to the correct Java 21 path
-        JAVA_HOME = '/usr/lib/jvm/java-21-openjdk'
+        JAVA_HOME = '/usr/lib/java-21-openjdk'
         MAVEN_HOME = '/usr/share/maven'
         PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"
     }
