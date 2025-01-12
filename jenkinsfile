@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Define environment variables
-        JAVA_HOME = '/usr/lib/jvm/java-21-openjdk'
+        JAVA_HOME = '/usr/lib/jvm/java-21'
         MAVEN_HOME = '/usr/share/maven'
         PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"
         AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
