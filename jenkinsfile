@@ -1,66 +1,83 @@
 pipeline {
     agent any
-    
+
     environment {
+        // Define environment variables
         JAVA_HOME = '/usr/lib/jvm/java-21-openjdk'
         MAVEN_HOME = '/usr/share/maven'
         PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // AWS access key
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // AWS secret key
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') 
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') 
+        EC2_USER = 'ubuntu'                        // EC2 username
+        EC2_HOST = '52.20.211.65'                  // EC2 instance IP
+        APP_PORT = '8080'                          // Application port
+        SSH_KEY_CREDENTIALS_ID = 'jenkins_ssh_key' // SSH key ID stored in Jenkins credentials
+        APP_JAR_NAME = 'spring-boot-app-3.1.2.jar' // JAR file name
+        IMAGE_NAME = 'spring-boot-app'             // Docker image name
+        IMAGE_TAG = 'latest'                       // Docker image tag
+        AWS_CREDENTIALS_ID = 'aws-credentials'    // Jenkins AWS credentials ID
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Checkout the latest code from the Git repository
+                // Checkout code from GitHub
                 checkout scm
             }
         }
 
-        stage('Set up AWS CLI') {
+        stage('Build Application') {
+            steps {
+                // Build the Spring Boot application with Maven
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // Configure AWS CLI with the provided AWS credentials
-                    sh 'aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID'
-                    sh 'aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY'
-                    sh 'aws configure set region us-east-1' // Change to your desired AWS region
+                    // Build Docker image
+                    sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
                 }
             }
         }
 
-        stage('Build Project') {
+        stage('Archive Artifact') {
             steps {
-                script {
-                    // Ensure Maven is properly set up and build the project
-                    sh 'mvn clean package -DskipTests'
-                }
+                // Archive the JAR file for later use
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
 
-        stage('Deploy to AWS') {
+        stage('Deploy to EC2') {
             steps {
-                script {
-                    // Example: Deploying to AWS Elastic Beanstalk
-                    // Modify these commands according to your AWS deployment setup
-                    sh 'aws elasticbeanstalk create-application-version --application-name YourApp --version-label v1 --source-bundle S3Bucket=your-bucket,S3Key=your-app-v1.zip'
-                    sh 'aws elasticbeanstalk update-environment --application-name YourApp --environment-name YourEnv --version-label v1'
-                }
-            }
-        }
+                // Use AWS credentials to configure AWS CLI
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
+                    // Deploy application via Docker
+                    sh """
+                    scp -o StrictHostKeyChecking=no target/${APP_JAR_NAME} ${EC2_USER}@${EC2_HOST}:/home/ubuntu/${APP_JAR_NAME}
+                    ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "docker run -d -p ${APP_PORT}:${APP_PORT} --name ${IMAGE_NAME} ${IMAGE_NAME}:${IMAGE_TAG}"
+                    """
 
-        stage('Notify') {
-            steps {
-                script {
-                    // Notify upon successful or failed execution (can be an email, Slack, etc.)
-                    echo 'Deployment Complete'
+                    // Alternatively, deploy the JAR directly (without Docker)
+                    // Uncomment below lines to deploy directly via SSH
+                    // sh """
+                    // scp -o StrictHostKeyChecking=no target/${APP_JAR_NAME} ${EC2_USER}@${EC2_HOST}:/home/ubuntu/${APP_JAR_NAME}
+                    // ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "nohup java -jar /home/ubuntu/${APP_JAR_NAME} > /dev/null 2>&1 &"
+                    // """
                 }
             }
         }
     }
-    
+
     post {
+        success {
+            echo 'Deployment successful!'
+        }
+        failure {
+            echo 'Deployment failed.'
+        }
         always {
-            // Actions to perform after pipeline execution, such as cleaning up
             echo 'Pipeline execution completed.'
         }
     }
