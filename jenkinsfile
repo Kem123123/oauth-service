@@ -11,6 +11,13 @@ pipeline {
         IMAGE_NAME = 'spring-boot-app'             // Docker image name
         IMAGE_TAG = 'latest'                       // Docker image tag
         AWS_CREDENTIALS_ID = 'AWS_credentials'    // Jenkins AWS credentials ID (configure AWS credentials in Jenkins)
+        JAVA_HOME = '/path/to/jdk-21'              // Update this with the correct path to JDK 21 on your Jenkins node
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"
+    }
+
+    tools {
+        jdk 'jdk-21' // This should match the name you gave the JDK in Jenkins Global Tool Configuration
+        maven 'Maven 3' // This should match the Maven version in Jenkins Global Tool Configuration
     }
 
     stages {
@@ -24,6 +31,9 @@ pipeline {
 
         stage('Build Application') {
             steps {
+                // Verify Java version
+                sh 'java -version' // Confirm JDK 21 is being used
+                
                 // Build the application with Maven
                 sh 'mvn clean package -DskipTests'
             }
