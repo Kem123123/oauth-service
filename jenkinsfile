@@ -5,8 +5,8 @@ pipeline {
         JAVA_HOME = '/usr/lib/jvm/java-21-openjdk'
         MAVEN_HOME = '/usr/share/maven'
         PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // Set your AWS credentials
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // Set your AWS credentials
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // AWS access key
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // AWS secret key
     }
 
     stages {
@@ -20,10 +20,10 @@ pipeline {
         stage('Set up AWS CLI') {
             steps {
                 script {
-                    // Configure AWS CLI (if needed)
+                    // Configure AWS CLI with the provided AWS credentials
                     sh 'aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID'
                     sh 'aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY'
-                    sh 'aws configure set region us-east-1' // Change to your region
+                    sh 'aws configure set region us-east-1' // Change to your desired AWS region
                 }
             }
         }
@@ -31,7 +31,7 @@ pipeline {
         stage('Build Project') {
             steps {
                 script {
-                    // Ensure that Maven is properly set up
+                    // Ensure Maven is properly set up and build the project
                     sh 'mvn clean package -DskipTests'
                 }
             }
@@ -41,7 +41,7 @@ pipeline {
             steps {
                 script {
                     // Example: Deploying to AWS Elastic Beanstalk
-                    // Modify this to suit your AWS deployment requirements
+                    // Modify these commands according to your AWS deployment setup
                     sh 'aws elasticbeanstalk create-application-version --application-name YourApp --version-label v1 --source-bundle S3Bucket=your-bucket,S3Key=your-app-v1.zip'
                     sh 'aws elasticbeanstalk update-environment --application-name YourApp --environment-name YourEnv --version-label v1'
                 }
@@ -60,7 +60,7 @@ pipeline {
     
     post {
         always {
-            // Actions to perform after pipeline execution, like cleaning up
+            // Actions to perform after pipeline execution, such as cleaning up
             echo 'Pipeline execution completed.'
         }
     }
