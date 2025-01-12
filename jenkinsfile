@@ -16,8 +16,8 @@ pipeline {
     }
 
     tools {
-        jdk 'jdk-21' // This should match the name you gave the JDK in Jenkins Global Tool Configuration
-        maven 'Maven 3' // This should match the Maven version in Jenkins Global Tool Configuration
+        jdk 'jdk-21'   // Use the name configured in Jenkins Global Tool Configuration for JDK 21
+        maven 'MAVEN_DEV' // Replace 'MAVEN_DEV' with the name of Maven configured in Jenkins
     }
 
     stages {
