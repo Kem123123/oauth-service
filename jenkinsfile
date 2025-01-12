@@ -18,7 +18,7 @@ pipeline {
             steps {
                 git branch: 'feature/devOps-branch', 
                     credentialsId: 'github_credentials', 
-                    url: 'https://https://github.com/Kem123123/oauth-service.git'  // Update this to your repository
+                    url: 'https://github.com/Kem123123/oauth-service.git'  // Update this to your repository
             }
         }
 
