@@ -35,7 +35,7 @@ pipeline {
                 sh 'java -version' // Confirm JDK 21 is being used
                 
                 // Explicitly set JAVA_HOME for Maven
-                withEnv(["JAVA_HOME=${env.JAVA_HOME}"]) {
+                withEnv(["JAVA_HOME=${env.JAVA_HOME}", "PATH=${env.JAVA_HOME}/bin:${env.PATH}"]) {
                     // Build the application with Maven
                     sh 'mvn clean package -DskipTests'
                 }
