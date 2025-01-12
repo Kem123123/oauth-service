@@ -1,0 +1,76 @@
+pipeline {
+    agent any
+
+    environment {
+        // Define environment variables
+        EC2_USER = 'ubuntu'                        // EC2 username
+        EC2_HOST = '52.20.211.65'                  // EC2 instance IP
+        APP_PORT = '8080'                          // Application port
+        SSH_KEY_CREDENTIALS_ID = 'jenkins_ssh_key' // ID of the SSH key stored in Jenkins credentials
+        APP_JAR_NAME = 'spring-boot-app-3.1.2.jar' // Correct JAR file name (adjust as needed)
+        IMAGE_NAME = 'spring-boot-app'             // Docker image name
+        IMAGE_TAG = 'latest'                       // Docker image tag
+        AWS_CREDENTIALS_ID = 'AWS_credentials'    // Jenkins AWS credentials ID (configure AWS credentials in Jenkins)
+    }
+
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: 'main', 
+                    credentialsId: 'github_credentials', 
+                    url: 'https://github.com/rajifyaora/oauth-service.git'  // Update this to your repository
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                // Build the application with Maven
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build Docker image
+                    sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+                }
+            }
+        }
+
+        stage('Archive Artifact') {
+            steps {
+                // Archive the JAR file to make it available for other stages if needed
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                // Use AWS credentials to configure AWS CLI
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: AWS_CREDENTIALS_ID]]) {
+                    // Option 1: If you want to deploy the JAR directly (without Docker)
+                    sh """
+                    scp -o StrictHostKeyChecking=no target/${APP_JAR_NAME} ${EC2_USER}@${EC2_HOST}:/home/ubuntu/${APP_JAR_NAME}
+                    ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "nohup java -jar /home/ubuntu/${APP_JAR_NAME} > /dev/null 2>&1 &"
+                    """
+
+                    // Option 2: If you're deploying via Docker
+                    sh """
+                    scp -o StrictHostKeyChecking=no target/${APP_JAR_NAME} ${EC2_USER}@${EC2_HOST}:/home/ubuntu/${APP_JAR_NAME}
+                    ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} "docker run -d -p ${APP_PORT}:${APP_PORT} --name ${IMAGE_NAME} ${IMAGE_NAME}:${IMAGE_TAG}"
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment successful!'
+        }
+        failure {
+            echo 'Deployment failed.'
+        }
+    }
+}
