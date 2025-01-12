@@ -11,7 +11,7 @@ pipeline {
         IMAGE_NAME = 'spring-boot-app'             // Docker image name
         IMAGE_TAG = 'latest'                       // Docker image tag
         AWS_CREDENTIALS_ID = 'AWS_credentials'    // Jenkins AWS credentials ID (configure AWS credentials in Jenkins)
-        JAVA_HOME = 'C:/Program Files/Java/jdk-21' // Updated path to JDK 21
+        JAVA_HOME = 'C:/Program Files/Java/jdk-21' // Correct path with forward slashes
         PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
 
@@ -34,8 +34,11 @@ pipeline {
                 // Verify Java version
                 sh 'java -version' // Confirm JDK 21 is being used
                 
-                // Build the application with Maven
-                sh 'mvn clean package -DskipTests'
+                // Explicitly set JAVA_HOME for Maven
+                withEnv(["JAVA_HOME=${env.JAVA_HOME}"]) {
+                    // Build the application with Maven
+                    sh 'mvn clean package -DskipTests'
+                }
             }
         }
 
