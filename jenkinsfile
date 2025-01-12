@@ -16,7 +16,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'feature/devOps-branch', 
+                git branch: 'feature/DevOps-branch', 
                     credentialsId: 'github_credentials', 
                     url: 'https://github.com/Kem123123/oauth-service.git'  // Update this to your repository
             }
