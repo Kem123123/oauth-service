@@ -3,9 +3,9 @@ pipeline {
 
     environment {
         // Define environment variables
-        EC2_USER = 'ubuntu'                        // EC2 username
-        EC2_HOST = '52.20.211.65'                  // EC2 instance IP
-        APP_PORT = '8080'                          // Application port
+        EC2_USER = 'ubuntu'                        // 
+        EC2_HOST = '52.20.211.65'                  // 
+        APP_PORT = '8080'                          // 
         SSH_KEY_CREDENTIALS_ID = 'jenkins_ssh_key' // ID of the SSH key stored in Jenkins credentials
         APP_JAR_NAME = 'oauth-service-0.0.1-SNAPSHOT.jar' // Correct JAR file name from the Maven build
         AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // AWS Access Key ID
