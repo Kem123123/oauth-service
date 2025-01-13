@@ -1,25 +1,14 @@
-# Use official OpenJDK 21 runtime as a parent image
-FROM openjdk:21-jdk-slim
+# Use an official OpenJDK runtime as a parent image
+FROM openjdk:17-jdk-slim
 
-# Set the working directory
+# Set the working directory to /app
 WORKDIR /app
 
-# Install necessary dependencies for Maven
-RUN apt-get update && apt-get install -y wget unzip
+# Copy the jar file into the container at /app
+COPY target/*.jar app.jar
 
-# Download and install Maven (latest version)
-RUN wget https://dlcdn.apache.org/maven/maven-3/3.9.0/binaries/apache-maven-3.9.0-bin.tar.gz -O /tmp/maven.tar.gz
-RUN mkdir /opt/maven && tar -xvzf /tmp/maven.tar.gz -C /opt/maven
-RUN ln -s /opt/maven/apache-maven-3.9.0/bin/mvn /usr/local/bin/mvn
-
-# Verify Maven installation
-RUN mvn -v
-
-# Copy the jar file into the container
-COPY target/my-app.jar /app/my-app.jar
-
-# Expose the port that the application will run on
+# Make port 8080 available to the world outside this container
 EXPOSE 8080
 
-# Command to run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "my-app.jar"]
+# Run the jar file 
+ENTRYPOINT ["java","-jar","/app.jar"]
