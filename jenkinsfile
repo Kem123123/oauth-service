@@ -2,7 +2,18 @@ pipeline {
     agent any
 
     environment {
-        // Define environment variables
+        EC2_USER = 'ubuntu'                        // EC2 username
+        EC2_HOST = '52.20.211.65'                  // EC2 instance IP
+        APP_PORT = '8080'                          // Application port
+        SSH_KEY_CREDENTIALS_ID = 'jenkins_ssh_key' // ID of the SSH key stored in Jenkins credentials
+        APP_JAR_NAME = 'spring-boot-starter-parent 3.1.2.jar' // Correct JAR file name (adjust if different)
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // AWS Access Key ID
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // AWS Secret Access Key
+
+        // Set JAVA_HOME to the correct Java 17 path
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
+        MAVEN_HOME = '/usr/share/maven'
+        PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"
     }
 
     stages {
@@ -10,13 +21,12 @@ pipeline {
             steps {
                 git branch: 'main', 
                     credentialsId: 'github_credentials', 
-                    url: 'https://github.com/Kem123123/oauth-service.git'
+                    url: 'https://github.com/Kem123123/oauth-service.git'  // Update this to your repository
             }
         }
 
         stage('Build Application') {
             steps {
-                // Build the application
                 sh 'mvn clean package -DskipTests'
             }
         }
@@ -29,7 +39,7 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                // Deploy the application
+                // Deploy the application to EC2
                 sh """
                 scp -o StrictHostKeyChecking=no -i ~/.ssh/${SSH_KEY_CREDENTIALS_ID} target/${APP_JAR_NAME} ${EC2_USER}@${EC2_HOST}:/home/ubuntu/${APP_JAR_NAME}
                 ssh -o StrictHostKeyChecking=no -i ~/.ssh/${SSH_KEY_CREDENTIALS_ID} ${EC2_USER}@${EC2_HOST} "nohup java -jar /home/ubuntu/${APP_JAR_NAME} > /dev/null 2>&1 &"
