@@ -7,7 +7,7 @@ import com.fyaora.security.oauth_service.model.Authority;
 import com.fyaora.security.oauth_service.model.UserInfo;
 import com.fyaora.security.oauth_service.repository.UserInfoRepository;
 import com.fyaora.security.oauth_service.service.AccountService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,9 +18,9 @@ import java.util.Optional;
 public class AccountServiceImpl implements AccountService {
 
     private final UserInfoRepository userInfoRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    public AccountServiceImpl(UserInfoRepository repository, BCryptPasswordEncoder passwordEncoder) {
+    public AccountServiceImpl(UserInfoRepository repository, PasswordEncoder passwordEncoder) {
         this.userInfoRepository = repository;
         this.passwordEncoder = passwordEncoder;
     }
