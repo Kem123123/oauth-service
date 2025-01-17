@@ -22,7 +22,11 @@ pipeline {
             steps {
                 git branch: 'main', 
                     credentialsId: 'github_credentials', 
+<<<<<<< HEAD
                     url: 'https://github.com/Kem123123/oauth-service.git'  // Update this to your repository
+=======
+                    url: 'https://github.com/rajifyaora/oauth-service.git'  // Update this to your repository
+>>>>>>> upstream/main
             }
         }
 
