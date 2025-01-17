@@ -8,8 +8,8 @@ pipeline {
         APP_PORT = '8080'                          // Application port
         SSH_KEY_PATH = '/var/lib/jenkins/.ssh/jenkins_ssh_key' // Correct path to the SSH private key
         APP_JAR_NAME = 'oauth-service-0.0.1-SNAPSHOT.jar' // Correct JAR file name from the Maven build
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // AWS Access Key ID
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // AWS Secret Access Key
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // AWS Access Key ID (Jenkins credentials)
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // AWS Secret Access Key (Jenkins credentials)
 
         // Set JAVA_HOME to the correct Java 17 path
         JAVA_HOME = '/usr/lib/jvm/java-17-openjdk-amd64'
@@ -21,12 +21,8 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 git branch: 'main', 
-                    credentialsId: 'github_credentials', 
-<<<<<<< HEAD
+                    credentialsId: 'github_credentials',  // Make sure this credential is set up in Jenkins
                     url: 'https://github.com/Kem123123/oauth-service.git'  // Update this to your repository
-=======
-                    url: 'https://github.com/rajifyaora/oauth-service.git'  // Update this to your repository
->>>>>>> upstream/main
             }
         }
 
