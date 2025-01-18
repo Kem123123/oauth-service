@@ -45,7 +45,7 @@ pipeline {
                 // Deploy the application to EC2, handling spaces in the JAR file name
                 sh """
                 scp -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} 'target/${APP_JAR_NAME}' ${EC2_USER}@${EC2_HOST}:/home/ubuntu/'${APP_JAR_NAME}'
-                ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ${EC2_USER}@${EC2_HOST} "nohup java -jar /home/ubuntu/'${APP_JAR_NAME}' > /dev/null 2>&1 &"
+                ssh -o StrictHostKeyChecking=no -i ${SSH_KEY_PATH} ${EC2_USER}@${EC2_HOST} "nohup java -jar /home/ubuntu/'${APP_JAR_NAME}' > /home/ubuntu/app.log 2>&1 &"
                 """
             }
         }
