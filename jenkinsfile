@@ -4,7 +4,7 @@ pipeline {
     environment {
         // Define environment variables
         EC2_USER = 'ubuntu'                        // EC2 user
-        EC2_HOST = '52.20.211.65'                  // EC2 host IP
+        EC2_HOST = '54.80.52.187'                  // EC2 host IP
         APP_PORT = '8080'                          // Application port
         SSH_KEY_PATH = '/var/lib/jenkins/.ssh/jenkins_ssh_key' // Correct path to the SSH private key
         APP_JAR_NAME = 'oauth-service-0.0.1-SNAPSHOT.jar' // Correct JAR file name from the Maven build
