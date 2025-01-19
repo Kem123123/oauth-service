@@ -22,38 +22,50 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsServiceImpl;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    // Constructor for dependency injection
     public SecurityConfig(UserDetailsService userDetailsServiceImpl, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
+    // Bean for Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder();  // BCrypt is a strong password encoding mechanism
     }
 
+    // Bean for HTTP security configurations
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**", "/api/v1/account", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated())
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+            // Specify which routes should be accessible without authentication
+            .authorizeRequests(auth -> auth
+                .antMatchers("/api/v1/auth/**", "/api/v1/account", "/swagger-ui/**", "/v3/api-docs/**")  // Add your open endpoints
+                .permitAll()  // Allow open access
+                .anyRequest().authenticated()  // All other requests need authentication
+            )
+            // Disable CSRF as we are using stateless authentication (JWT)
+            .csrf(AbstractHttpConfigurer::disable)
+            // Stateless session management to ensure no sessions are created (JWT based)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        // Add custom JWT filter to validate incoming requests
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
+    // Bean for AuthenticationManager
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+        return authenticationConfiguration.getAuthenticationManager();  // Retrieves the AuthenticationManager
     }
 
+    // Bean for DaoAuthenticationProvider
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsServiceImpl);
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setUserDetailsService(userDetailsServiceImpl);  // Use your custom userDetailsService
+        provider.setPasswordEncoder(passwordEncoder());  // Set the BCrypt password encoder
         return provider;
     }
 }
